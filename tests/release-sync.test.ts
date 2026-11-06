@@ -91,17 +91,21 @@ describe("upstream release parsing", () => {
     };
 
     const added = upsertAppVersion(metadata, "zhihu-minus-minus", nextEntry);
-    expect(added.apps[0]?.versions.map((entry) => entry.version)).toEqual([
-      "0.9.10",
-      "0.9.9",
-    ]);
+    expect(
+      added.apps
+        .find((app) => app.id === "zhihu-minus-minus")
+        ?.versions.map((entry) => entry.version),
+    ).toEqual(["0.9.10", "0.9.9"]);
 
     const replaced = upsertAppVersion(added, "zhihu-minus-minus", {
       ...nextEntry,
       versionDescription: "修订说明",
     });
-    expect(replaced.apps[0]?.versions).toHaveLength(2);
-    expect(replaced.apps[0]?.versions[0]?.versionDescription).toBe("修订说明");
+    const replacedZhihu = replaced.apps.find(
+      (app) => app.id === "zhihu-minus-minus",
+    );
+    expect(replacedZhihu?.versions).toHaveLength(2);
+    expect(replacedZhihu?.versions[0]?.versionDescription).toBe("修订说明");
   });
 
   it("creates a missing app from upstream defaults", async () => {

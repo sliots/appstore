@@ -8,7 +8,10 @@ describe("metadata schema", () => {
     const raw = JSON.parse(
       await readFile(join(process.cwd(), "data", "apps.json"), "utf8"),
     );
-    raw.apps[0].versions[0].file.key =
+    const zhihu = raw.apps.find(
+      (app: { id: string }) => app.id === "zhihu-minus-minus",
+    );
+    zhihu.versions[0].file.key =
       "apps/other-app/0.9.9/zhihu-minus-minus.ipa";
 
     expect(() => appsMetadataSchema.parse(raw)).toThrow(
@@ -20,7 +23,10 @@ describe("metadata schema", () => {
     const raw = JSON.parse(
       await readFile(join(process.cwd(), "data", "apps.json"), "utf8"),
     );
-    raw.apps[0].versions.push(structuredClone(raw.apps[0].versions[0]));
+    const zhihu = raw.apps.find(
+      (app: { id: string }) => app.id === "zhihu-minus-minus",
+    );
+    zhihu.versions.push(structuredClone(zhihu.versions[0]));
 
     expect(() => appsMetadataSchema.parse(raw)).toThrow("duplicate version");
   });
@@ -29,7 +35,10 @@ describe("metadata schema", () => {
     const raw = JSON.parse(
       await readFile(join(process.cwd(), "data", "apps.json"), "utf8"),
     );
-    raw.apps[0].icon = "icons/../secret.png";
+    const zhihu = raw.apps.find(
+      (app: { id: string }) => app.id === "zhihu-minus-minus",
+    );
+    zhihu.icon = "icons/../secret.png";
 
     expect(() => appsMetadataSchema.parse(raw)).toThrow();
   });

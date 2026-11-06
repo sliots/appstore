@@ -9,7 +9,11 @@ import {
   normalizeBaseUrl,
 } from "../src/build.js";
 import { loadMetadata } from "../src/metadata.js";
-import { signAllSourceSchema } from "../src/schema.js";
+import {
+  signAllSourceSchema,
+  upstreamsMetadataSchema,
+} from "../src/schema.js";
+import { upsertTrackedVersion } from "../scripts/sync-upstream-release.js";
 
 const tempDirectories: string[] = [];
 
@@ -34,8 +38,12 @@ describe("SignAll source generation", () => {
     expect(payload.sourceicon).toBe(
       "https://source.example.com/icons/source.png",
     );
-    expect(payload.apps).toHaveLength(1);
-    expect(payload.apps[0]).toMatchObject({
+    expect(payload.apps.length).toBeGreaterThanOrEqual(1);
+    const zhihu = payload.apps.find(
+      (app) => app.name === "知乎--" && app.version === "0.9.9",
+    );
+    expect(zhihu).toBeDefined();
+    expect(zhihu).toMatchObject({
       name: "知乎--",
       type: "1",
       version: "0.9.9",
@@ -45,7 +53,7 @@ describe("SignAll source generation", () => {
       tintColor: "1D9BF0",
       size: "14830602",
     });
-    expect(payload.apps[0]?.downloadURL).toBe(
+    expect(zhihu?.downloadURL).toBe(
       "https://ipa.example.com/apps/zhihu-minus-minus/0.9.9/zhihu-minus-minus-v0.9.9-unsigned.ipa",
     );
   });
@@ -69,6 +77,51 @@ describe("SignAll source generation", () => {
     expect((await stat(join(distDir, "icons", "source.png"))).isFile()).toBe(
       true,
     );
+  });
+
+  it("keeps established app assertions valid after adding another app", async () => {
+    const metadata = await loadMetadata();
+    const upstreams = upstreamsMetadataSchema.parse(
+      JSON.parse(
+        await readFile(join(process.cwd(), "data", "upstreams.json"), "utf8"),
+      ),
+    ).upstreams;
+    const jhentai = upstreams.find((upstream) => upstream.appId === "jhentai");
+    if (!jhentai) {
+      throw new Error("JHenTai upstream fixture is missing");
+    }
+
+    const expanded = upsertTrackedVersion(metadata, jhentai, {
+      version: "8.0.18",
+      versionDate: "2026-10-23T15:40:51Z",
+      versionDescription: "测试版本",
+      file: {
+        key: "apps/jhentai/8.0.18/JHenTai_8.0.18+344.ipa",
+        size: 13_027_008,
+        sha256:
+          "9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181",
+      },
+    });
+    const payload = createSourcePayload(
+      { ...metadata, apps: expanded.apps },
+      "https://source.example.com",
+      "https://ipa.example.com",
+    );
+
+    expect(
+      payload.apps.find(
+        (app) => app.name === "知乎--" && app.version === "0.9.9",
+      ),
+    ).toBeDefined();
+    expect(
+      payload.apps.find(
+        (app) => app.name === "JHenTai" && app.version === "8.0.18",
+      ),
+    ).toMatchObject({
+      type: "1",
+      iconURL: "https://source.example.com/icons/jhentai.png",
+      size: "13027008",
+    });
   });
 });
 
