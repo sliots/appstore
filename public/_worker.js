@@ -4,7 +4,7 @@ const ALLOWED_METHODS = "GET, HEAD, POST, OPTIONS";
 function jsonHeaders(sourceHeaders, source) {
   const headers = new Headers(sourceHeaders);
   headers.set("Content-Type", "application/json; charset=utf-8");
-  headers.set("Cache-Control", "public, max-age=300, must-revalidate");
+  headers.set("Cache-Control", "no-store, max-age=0, must-revalidate");
   headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Access-Control-Allow-Methods", ALLOWED_METHODS);
   headers.set("Access-Control-Allow-Headers", "Content-Type");
