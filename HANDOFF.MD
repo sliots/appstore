@@ -70,9 +70,11 @@
 - GitHub Actions 的 cron 使用 UTC；当前 `17 1 * * *` 对应北京时间约 09:17，平台负载可能造成延迟。
 - JHenTai 的 iOS bundle identifier 来自 `ios/Runner.xcodeproj/project.pbxproj`：`top.jtmonster.jhentai`。
 - JHenTai 最新 IPA 为 `JHenTai_8.0.18+344.ipa`，`13027008` 字节，SHA-256 `9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181`。
+- 首次 JHenTai 同步时，Cloudflare 构建和静态资源上传成功，但 Function 发布返回 `Unknown internal error occurred`；通过 Pages API 重试同一提交后成功。
+- GitHub Actions 的“部署后验证”曾因未配置 `PUBLIC_BASE_URL` Variable 而被跳过，掩盖了 Pages 构建失败；现在 workflow 默认回退到 `https://signall-app-source.pages.dev` 并始终执行版本验证。
 
 ## 下一步
 
 - 创建仅含 R2 写权限的 Cloudflare API Token，并写入 GitHub Secrets。
-- 添加 `PUBLIC_BASE_URL` 和 `R2_BUCKET` Repository Variables。
+- 建议添加 `PUBLIC_BASE_URL` 和 `R2_BUCKET` Repository Variables；即使缺少 `PUBLIC_BASE_URL`，工作流现在也会验证默认 Pages 地址。
 - 手动运行 `Sync upstream release`，确认当前 `v0.9.9` 返回无更新。

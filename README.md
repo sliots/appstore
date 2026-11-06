@@ -159,11 +159,13 @@ npm run ipa:upload -- --file $ipa --key $key --bucket signall-ipa
 可选的 Repository Variables：
 
 - `R2_BUCKET`：R2 bucket 名称，未设置时默认 `signall-ipa`。
-- `PUBLIC_BASE_URL`：线上源 origin，例如 `https://signall-app-source.pages.dev`。设置后，自动化会在发布后验证新版本是否已经出现在公开源。
+- `PUBLIC_BASE_URL`：线上源 origin，例如 `https://signall-app-source.pages.dev`。未设置时工作流默认验证当前项目地址；仍建议显式设置，避免以后切换域名时检查错误目标。
 
 Cloudflare Token 只保存在 GitHub Secrets，不写入仓库、构建产物或日志。若仓库或组织限制了 `GITHUB_TOKEN` 的写权限，需要在 `Settings` → `Actions` → `General` 中允许工作流写入仓库内容。
 
 首次启用前必须完成 Cloudflare Pages Git 连接。上传 IPA 失败时，工作流会在提交元数据之前停止，不会发布指向不存在文件的版本。
+
+如果 Cloudflare 已完成构建和资源上传，但最终提示 `Failed to publish your Function`，这属于 Pages Function 发布阶段的平台错误。可在 Pages 部署详情中点击重试；本项目已确认重试后能够成功。
 
 ## 部署到 Cloudflare Pages
 

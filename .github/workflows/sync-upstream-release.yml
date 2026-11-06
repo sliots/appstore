@@ -84,9 +84,9 @@ jobs:
           git push
 
       - name: Verify deployed source
-        if: steps.release.outputs.updated == 'true' && vars.PUBLIC_BASE_URL != ''
+        if: steps.release.outputs.updated == 'true'
         env:
-          PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
+          PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL || 'https://signall-app-source.pages.dev' }}
           RELEASE_VERSIONS: ${{ steps.release.outputs.versions }}
         run: >-
           npm run verify:public --
