@@ -59,6 +59,26 @@
           }
         }
       ]
+    },
+    {
+      "id": "gatenest",
+      "name": "GateNest",
+      "bundleIdentifier": "com.ppx.sub2apimate",
+      "icon": "icons/gatenest.png",
+      "type": 4,
+      "tintColor": "1F6058",
+      "versions": [
+        {
+          "version": "1.9.0",
+          "versionDate": "2026-10-02T16:04:00Z",
+          "versionDescription": "GateNest v1.9.0 includes Android APKs and the iOS IPA built from the same source commit.\n\n## [1.9.0] - 2026-10-03\n\n### Added\n\n- Native Feature Center with module filtering, typed operation forms, configuration loading, record actions, and explicit confirmation for mutations.\n- Password and remembered-account login support for TOTP two-factor authentication.\n- Account and group options for Kimi, Zhipu, DeepSeek, MiniMax, OpenCode GO, and TypeSafe / Jev.\n- Complete account and system-settings field forms, plus official-site entry points for payment and browser authentication.\n\n### Fixed\n\n- OpenAI Base URL now uses the login server's public `api_base_url` setting, preserving separate API hosts and deployment paths.\n- User API key creation and editing now include available-group selection.\n- Multipart and raw requests reuse session refresh, while stale responses cannot refresh a different selected account.\n\n### Changed\n\n- Pin the Sub2API API and request-schema inventory to `b8dece9000c68815a5b867ca5a1e6f236e173905`, including payment and channel-monitor V2 routes.\n- Distinguish handwritten integrations from generated API wrappers in coverage reporting.\n- Keep Android APKs and the unsigned iOS IPA in one version-verified release.\n\nAndroid: arm64-v8a, armeabi-v7a, x86_64. iOS: iPhone and iPad, iOS 16.0 or later. The IPA requires re-signing with a P12 certificate and matching provisioning profile.\n\nSource commit: 506084c4fef618fa208fd8f35ec55180df3bbfb8",
+          "file": {
+            "key": "apps/gatenest/1.9.0/gatenest-v1.9.0-unsigned.ipa",
+            "size": 18785383,
+            "sha256": "8c13588c24194fbcee2b021c18937e9d88c6a04cfb5234c0a4ea32bdc8d3ac8f"
+          }
+        }
+      ]
     }
   ]
 }
