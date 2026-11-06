@@ -127,7 +127,7 @@ npm run ipa:upload -- --file $ipa --key $key --bucket signall-ipa
 
 ## 自动跟踪上游 Release
 
-[sync-upstream-release.yml](.github/workflows/sync-upstream-release.yml) 每 6 小时检查 [data/upstreams.json](data/upstreams.json) 中所有仓库的最新正式 Release，也可以从 GitHub Actions 页面手动运行。
+[sync-upstream-release.yml](.github/workflows/sync-upstream-release.yml) 每天检查一次 [data/upstreams.json](data/upstreams.json) 中所有仓库的最新正式 Release，计划时间为 `Asia/Shanghai` 约 09:17，也可以从 GitHub Actions 页面手动运行。
 
 当前跟踪：
 

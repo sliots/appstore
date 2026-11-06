@@ -12,7 +12,7 @@
 - GitHub `main` 已建立并推送，自动同步功能随最新提交发布。
 - Pages 项目 Git Provider 已为 `Yes`，最新 `main` 提交构建成功并成为 Production。
 - 本机 `.env` 已配置真实公开地址，文件被 Git 忽略。
-- 已实现 `.github/workflows/sync-upstream-release.yml`，每 6 小时检查 `data/upstreams.json` 中所有仓库的最新正式 Release。
+- 已实现 `.github/workflows/sync-upstream-release.yml`，每天约 09:17（Asia/Shanghai）检查 `data/upstreams.json` 中所有仓库的最新正式 Release。
 - 自动同步会下载未签名 IPA、核对 GitHub digest、上传 R2、更新版本历史、提交并等待 Pages 发布新版本。
 - 已加入 `jiangtian616/JHenTai` 跟踪配置与图标，但按用户要求没有本地上传其 IPA；首次 Actions 运行时会创建 app 并上传 `JHenTai_8.0.18+344.ipa`。
 
@@ -66,6 +66,7 @@
 - GitHub 自动同步上传 R2 需要 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID` Secrets；若缺少，新版本任务会在上传阶段失败且不会提交元数据。
 - 自动同步只更新版本、更新说明、日期、大小、SHA-256 和 R2 键。上游如果修改 bundle identifier 或图标，仍需人工更新配置。
 - 多仓库同步先下载所有变更并更新内存中的 metadata，全部成功后才写 `data/apps.json`；任何一个下载校验失败都不会产生 R2 之后的元数据提交。
+- GitHub Actions 的 cron 使用 UTC；当前 `17 1 * * *` 对应北京时间约 09:17，平台负载可能造成延迟。
 - JHenTai 的 iOS bundle identifier 来自 `ios/Runner.xcodeproj/project.pbxproj`：`top.jtmonster.jhentai`。
 - JHenTai 最新 IPA 为 `JHenTai_8.0.18+344.ipa`，`13027008` 字节，SHA-256 `9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181`。
 
