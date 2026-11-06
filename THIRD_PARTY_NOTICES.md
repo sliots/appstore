@@ -19,3 +19,10 @@ All uploaded IPAs must be legally redistributable by the operator. Signing an IP
 - License: Apache License 2.0
 
 `public/icons/jhentai.png` is sourced from the JHenTai iOS AppIcon asset. The IPA itself is not committed to this repository.
+
+## PPSSPP
+
+- Project: https://github.com/hrydgard/ppsspp
+- License: GNU General Public License, version 2 or later
+
+`public/icons/ppsspp.png` is sourced from the PPSSPP iOS AppIcon asset. The IPA itself is not committed to this repository.

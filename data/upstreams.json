@@ -14,6 +14,17 @@
         "type": 1,
         "tintColor": "E6E623"
       }
+    },
+    {
+      "repository": "hrydgard/ppsspp",
+      "appId": "ppsspp",
+      "createApp": {
+        "name": "PPSSPP",
+        "bundleIdentifier": "org.ppsspp.ppsspp-free",
+        "icon": "icons/ppsspp.png",
+        "type": 2,
+        "tintColor": "2D4553"
+      }
     }
   ]
 }

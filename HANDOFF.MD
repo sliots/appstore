@@ -70,6 +70,9 @@
 - GitHub Actions 的 cron 使用 UTC；当前 `17 1 * * *` 对应北京时间约 09:17，平台负载可能造成延迟。
 - JHenTai 的 iOS bundle identifier 来自 `ios/Runner.xcodeproj/project.pbxproj`：`top.jtmonster.jhentai`。
 - JHenTai 最新 IPA 为 `JHenTai_8.0.18+344.ipa`，`13027008` 字节，SHA-256 `9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181`。
+- 已加入 `hrydgard/ppsspp` 跟踪配置与官方 iOS 图标，未在本地上传其 IPA；下一次 Actions 会创建 app 并上传 `PPSSPP-iOS-v1.20.4.ipa`。
+- PPSSPP 的 bundle identifier 来自 `ios/PPSSPP-Info.plist`：`org.ppsspp.ppsspp-free`。
+- PPSSPP 最新 IPA 为 `PPSSPP-iOS-v1.20.4.ipa`，`31124277` 字节，SHA-256 `822c7042311ff47710c9148c8edb5aab649cf85ce6ba96b9e8190feb91f45a51`，许可证 GPL-2.0-or-later。
 - 首次 JHenTai 同步时，Cloudflare 构建和静态资源上传成功，但 Function 发布返回 `Unknown internal error occurred`；通过 Pages API 重试同一提交后成功。
 - GitHub Actions 的“部署后验证”曾因未配置 `PUBLIC_BASE_URL` Variable 而被跳过，掩盖了 Pages 构建失败；现在 workflow 默认回退到 `https://signall-app-source.pages.dev` 并始终执行版本验证。
 - `/appstore` 响应已改为 `Cache-Control: no-store`，避免更新后手机端继续缓存旧 JSON。若客户端自身仍缓存，手动下拉刷新或重启客户端即可。

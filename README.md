@@ -133,6 +133,7 @@ npm run ipa:upload -- --file $ipa --key $key --bucket signall-ipa
 
 - `huamurui/zhihu-minus-minus` → app id `zhihu-minus-minus`
 - `jiangtian616/JHenTai` → app id `jhentai`
+- `hrydgard/ppsspp` → app id `ppsspp`
 
 处理流程：
 
