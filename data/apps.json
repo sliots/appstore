@@ -39,6 +39,26 @@
           }
         }
       ]
+    },
+    {
+      "id": "ppsspp",
+      "name": "PPSSPP",
+      "bundleIdentifier": "org.ppsspp.ppsspp-free",
+      "icon": "icons/ppsspp.png",
+      "type": 2,
+      "tintColor": "2D4553",
+      "versions": [
+        {
+          "version": "1.20.4",
+          "versionDate": "2026-05-16T12:35:08Z",
+          "versionDescription": "PPSSPP is a cross-platform PSP emulator. Visit PPSSPP [official website](https://ppsspp.org) for a [full changelog](https://ppsspp.org/index.html#news) as well as the [downloads section](https://ppsspp.org/downloads.html) for other platforms.",
+          "file": {
+            "key": "apps/ppsspp/1.20.4/PPSSPP-iOS-v1.20.4.ipa",
+            "size": 31124277,
+            "sha256": "822c7042311ff47710c9148c8edb5aab649cf85ce6ba96b9e8190feb91f45a51"
+          }
+        }
+      ]
     }
   ]
 }
