@@ -91,14 +91,15 @@ export const appVersionSchema = z
   })
   .strict();
 
-const appSchema = z
+const appIdSchema = z
+  .string()
+  .regex(
+    /^[a-z0-9][a-z0-9-]*$/u,
+    "must use lowercase letters, digits, and hyphens",
+  );
+
+const appDefaultsSchema = z
   .object({
-    id: z
-      .string()
-      .regex(
-        /^[a-z0-9][a-z0-9-]*$/u,
-        "must use lowercase letters, digits, and hyphens",
-      ),
     name: z.string().trim().min(1).max(200),
     bundleIdentifier: z
       .string()
@@ -111,6 +112,13 @@ const appSchema = z
     tintColor: z
       .string()
       .regex(/^[0-9A-Fa-f]{6}$/u, "must be a six-digit hex color without #"),
+  })
+  .strict();
+
+const appSchema = z
+  .object({
+    id: appIdSchema,
+    ...appDefaultsSchema.shape,
     versions: z.array(appVersionSchema).min(1),
   })
   .strict()
@@ -169,6 +177,52 @@ export const appsMetadataSchema = z
     });
   });
 
+export const upstreamsMetadataSchema = z
+  .object({
+    upstreams: z
+      .array(
+        z
+          .object({
+            repository: z
+              .string()
+              .regex(
+                /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/u,
+                "must be a GitHub repository in owner/name form",
+              ),
+            appId: appIdSchema,
+            createApp: appDefaultsSchema.optional(),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict()
+  .superRefine(({ upstreams }, context) => {
+    const repositories = new Set<string>();
+    const appIds = new Set<string>();
+
+    upstreams.forEach((upstream, index) => {
+      const repository = upstream.repository.toLowerCase();
+      if (repositories.has(repository)) {
+        context.addIssue({
+          code: "custom",
+          path: ["upstreams", index, "repository"],
+          message: `duplicate repository '${upstream.repository}'`,
+        });
+      }
+      repositories.add(repository);
+
+      if (appIds.has(upstream.appId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["upstreams", index, "appId"],
+          message: `duplicate app id '${upstream.appId}'`,
+        });
+      }
+      appIds.add(upstream.appId);
+    });
+  });
+
 export const signAllAppSchema = z.object({
   name: z.string(),
   type: z.union([z.literal(0), z.enum(["1", "2", "3", "4", "5"])]),
@@ -195,7 +249,9 @@ export const signAllSourceSchema = z.object({
 });
 
 export type SourceMetadata = z.infer<typeof sourceMetadataSchema>;
+export type AppDefaults = z.infer<typeof appDefaultsSchema>;
 export type AppMetadata = z.infer<typeof appSchema>;
 export type AppsMetadata = z.infer<typeof appsMetadataSchema>;
 export type AppVersionMetadata = z.infer<typeof appVersionSchema>;
+export type UpstreamsMetadata = z.infer<typeof upstreamsMetadataSchema>;
 export type SignAllSource = z.infer<typeof signAllSourceSchema>;

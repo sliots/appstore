@@ -6,8 +6,12 @@ async function run(): Promise<void> {
     (total, app) => total + app.versions.length,
     0,
   );
+  const pendingApps = metadata.upstreams.filter(
+    (upstream) =>
+      !metadata.apps.some((app) => app.id === upstream.appId),
+  );
   console.log(
-    `Metadata is valid: ${metadata.apps.length} app(s), ${versions} version(s), identifier '${metadata.source.identifier}'.`,
+    `Metadata is valid: ${metadata.apps.length} app(s), ${versions} version(s), ${metadata.upstreams.length} upstream tracker(s), ${pendingApps.length} pending app(s), identifier '${metadata.source.identifier}'.`,
   );
 }
 

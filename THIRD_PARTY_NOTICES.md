@@ -12,3 +12,10 @@
 The upstream project and its trademarks remain the property of their respective owners. The MIT License in this repository applies to this repository's original code, not to third-party assets.
 
 All uploaded IPAs must be legally redistributable by the operator. Signing an IPA does not grant distribution rights.
+
+## JHenTai
+
+- Project: https://github.com/jiangtian616/JHenTai
+- License: Apache License 2.0
+
+`public/icons/jhentai.png` is sourced from the JHenTai iOS AppIcon asset. The IPA itself is not committed to this repository.

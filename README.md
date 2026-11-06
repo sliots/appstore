@@ -8,6 +8,7 @@
 
 - `data/source.json`：源名称、稳定标识、公告和源图标。
 - `data/apps.json`：应用、版本、R2 对象键、文件大小和 SHA-256。
+- `data/upstreams.json`：自动跟踪的 GitHub 仓库与应用 ID 映射。
 - `src/schema.ts`：Zod Schema 和跨文件约束。
 - `dist/appstore` / `dist/appstore.json`：构建出的静态源 JSON。
 - `public/_worker.js`：约 70 行的 Pages 兼容层，让 `/appstore` 同时接受 GET、POST 和 HEAD。
@@ -126,7 +127,12 @@ npm run ipa:upload -- --file $ipa --key $key --bucket signall-ipa
 
 ## 自动跟踪上游 Release
 
-[sync-upstream-release.yml](.github/workflows/sync-upstream-release.yml) 每 6 小时检查一次 `huamurui/zhihu-minus-minus` 的最新正式 Release，也可以从 GitHub Actions 页面手动运行。
+[sync-upstream-release.yml](.github/workflows/sync-upstream-release.yml) 每 6 小时检查 [data/upstreams.json](data/upstreams.json) 中所有仓库的最新正式 Release，也可以从 GitHub Actions 页面手动运行。
+
+当前跟踪：
+
+- `huamurui/zhihu-minus-minus` → app id `zhihu-minus-minus`
+- `jiangtian616/JHenTai` → app id `jhentai`
 
 处理流程：
 
@@ -140,6 +146,8 @@ npm run ipa:upload -- --file $ipa --key $key --bucket signall-ipa
 8. 等待并验证线上源确实包含新版本。
 
 版本已经存在且文件大小、SHA-256 均一致时，工作流不会下载 IPA，也不会产生提交。
+
+上游首次出现、但 `data/apps.json` 中尚无对应应用时，`upstreams.json` 必须提供 `createApp` 基础配置。Actions 会先下载并上传 IPA，再把新应用和首个版本写入 `data/apps.json`。因此不要手工预置一个指向尚未上传 R2 文件的版本。
 
 ### GitHub 配置
 
@@ -246,7 +254,8 @@ https://signall-app-source.pages.dev/appstore
 .
 ├── data/
 │   ├── source.json
-│   └── apps.json
+│   ├── apps.json
+│   └── upstreams.json
 ├── public/
 │   ├── _headers
 │   ├── _worker.js

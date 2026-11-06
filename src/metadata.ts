@@ -4,13 +4,16 @@ import { ZodError, type ZodType } from "zod";
 import {
   appsMetadataSchema,
   sourceMetadataSchema,
+  upstreamsMetadataSchema,
   type AppsMetadata,
   type SourceMetadata,
+  type UpstreamsMetadata,
 } from "./schema.js";
 
 export interface MetadataBundle {
   source: SourceMetadata;
   apps: AppsMetadata["apps"];
+  upstreams: UpstreamsMetadata["upstreams"];
 }
 
 function parseJson<T>(schema: ZodType<T>, raw: string, path: string): T {
@@ -41,14 +44,21 @@ function parseJson<T>(schema: ZodType<T>, raw: string, path: string): T {
 export async function loadMetadata(rootDir = process.cwd()): Promise<MetadataBundle> {
   const sourcePath = join(rootDir, "data", "source.json");
   const appsPath = join(rootDir, "data", "apps.json");
+  const upstreamsPath = join(rootDir, "data", "upstreams.json");
 
-  const [sourceRaw, appsRaw] = await Promise.all([
+  const [sourceRaw, appsRaw, upstreamsRaw] = await Promise.all([
     readFile(sourcePath, "utf8"),
     readFile(appsPath, "utf8"),
+    readFile(upstreamsPath, "utf8"),
   ]);
 
   const source = parseJson(sourceMetadataSchema, sourceRaw, sourcePath);
   const apps = parseJson(appsMetadataSchema, appsRaw, appsPath).apps;
+  const upstreams = parseJson(
+    upstreamsMetadataSchema,
+    upstreamsRaw,
+    upstreamsPath,
+  ).upstreams;
 
   if (source.sourceicon.startsWith("icons/")) {
     await assertFileExists(join(rootDir, "public", source.sourceicon), "source icon");
@@ -61,7 +71,22 @@ export async function loadMetadata(rootDir = process.cwd()): Promise<MetadataBun
     );
   }
 
-  return { source, apps };
+  for (const upstream of upstreams) {
+    const existingApp = apps.find((app) => app.id === upstream.appId);
+    if (!existingApp && !upstream.createApp) {
+      throw new Error(
+        `${upstreamsPath}: upstream '${upstream.repository}' references missing app '${upstream.appId}' without createApp defaults`,
+      );
+    }
+    if (upstream.createApp) {
+      await assertFileExists(
+        join(rootDir, "public", upstream.createApp.icon),
+        `${upstream.appId} default icon`,
+      );
+    }
+  }
+
+  return { source, apps, upstreams };
 }
 
 async function assertFileExists(path: string, label: string): Promise<void> {

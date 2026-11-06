@@ -10,10 +10,14 @@ import {
   selectIpaAsset,
   sha256FromDigest,
   upsertAppVersion,
+  upsertTrackedVersion,
   versionFromTag,
   type GitHubRelease,
 } from "../scripts/sync-upstream-release.js";
-import { appsMetadataSchema } from "../src/schema.js";
+import {
+  appsMetadataSchema,
+  upstreamsMetadataSchema,
+} from "../src/schema.js";
 
 const digest =
   "adc704a5dbe41e80c3a11946d79cef9c16a9bfaee01834beeebe21a1672b32ae";
@@ -98,6 +102,46 @@ describe("upstream release parsing", () => {
     });
     expect(replaced.apps[0]?.versions).toHaveLength(2);
     expect(replaced.apps[0]?.versions[0]?.versionDescription).toBe("修订说明");
+  });
+
+  it("creates a missing app from upstream defaults", async () => {
+    const metadata = appsMetadataSchema.parse(
+      JSON.parse(
+        await readFile(join(process.cwd(), "data", "apps.json"), "utf8"),
+      ),
+    );
+    const upstreams = upstreamsMetadataSchema.parse(
+      JSON.parse(
+        await readFile(join(process.cwd(), "data", "upstreams.json"), "utf8"),
+      ),
+    ).upstreams;
+    const jhentai = upstreams.find((upstream) => upstream.appId === "jhentai");
+    if (!jhentai) {
+      throw new Error("JHenTai upstream fixture is missing");
+    }
+
+    const updated = upsertTrackedVersion(metadata, jhentai, {
+      version: "8.0.18",
+      versionDate: "2026-10-23T15:40:51Z",
+      versionDescription: "修复归档解锁解析异常。",
+      file: {
+        key: "apps/jhentai/8.0.18/JHenTai_8.0.18+344.ipa",
+        size: 13_027_008,
+        sha256:
+          "9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181",
+      },
+    });
+
+    expect(updated.apps.find((app) => app.id === "jhentai")).toMatchObject({
+      name: "JHenTai",
+      bundleIdentifier: "top.jtmonster.jhentai",
+      icon: "icons/jhentai.png",
+      type: 1,
+      tintColor: "E6E623",
+    });
+    expect(
+      updated.apps.find((app) => app.id === "jhentai")?.versions[0]?.version,
+    ).toBe("8.0.18");
   });
 });
 

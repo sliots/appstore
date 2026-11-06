@@ -9,7 +9,7 @@ import {
   stat,
   writeFile,
 } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { pathToFileURL } from "node:url";
@@ -17,7 +17,9 @@ import { parseArgs } from "node:util";
 import {
   appVersionSchema,
   appsMetadataSchema,
+  upstreamsMetadataSchema,
   type AppsMetadata,
+  type UpstreamsMetadata,
 } from "../src/schema.js";
 
 export interface GitHubReleaseAsset {
@@ -39,18 +41,27 @@ export interface GitHubRelease {
   assets: GitHubReleaseAsset[];
 }
 
-export interface SyncResult {
-  updated: boolean;
+export interface SyncUpdate {
+  repository: string;
+  appId: string;
   version: string;
   reason: string;
-  file?: string;
-  key?: string;
+  file: string;
+  key: string;
 }
 
+export interface SyncManifest {
+  checkedAt: string;
+  updates: SyncUpdate[];
+}
+
+type Upstream = UpstreamsMetadata["upstreams"][number];
+type VersionEntry = AppsMetadata["apps"][number]["versions"][number];
+
 interface CliOptions {
-  upstreamRepository: string;
-  appId: string;
+  trackersPath: string;
   outputDir: string;
+  manifestOutput: string;
   githubOutput?: string | undefined;
 }
 
@@ -84,10 +95,9 @@ export function releaseDescription(release: GitHubRelease): string {
 export function upsertAppVersion(
   metadata: AppsMetadata,
   appId: string,
-  versionEntry: AppsMetadata["apps"][number]["versions"][number],
+  versionEntry: VersionEntry,
 ): AppsMetadata {
-  const appIndex = metadata.apps.findIndex((app) => app.id === appId);
-  if (appIndex < 0) {
+  if (!metadata.apps.some((app) => app.id === appId)) {
     throw new Error(`App '${appId}' does not exist in data/apps.json`);
   }
 
@@ -112,25 +122,50 @@ export function upsertAppVersion(
   });
 }
 
+export function upsertTrackedVersion(
+  metadata: AppsMetadata,
+  upstream: Upstream,
+  versionEntry: VersionEntry,
+): AppsMetadata {
+  if (metadata.apps.some((app) => app.id === upstream.appId)) {
+    return upsertAppVersion(metadata, upstream.appId, versionEntry);
+  }
+  if (!upstream.createApp) {
+    throw new Error(
+      `App '${upstream.appId}' does not exist and upstream '${upstream.repository}' has no createApp defaults`,
+    );
+  }
+
+  return appsMetadataSchema.parse({
+    apps: [
+      ...metadata.apps,
+      {
+        id: upstream.appId,
+        ...upstream.createApp,
+        versions: [versionEntry],
+      },
+    ],
+  });
+}
+
 function parseCli(): CliOptions {
   const { values } = parseArgs({
     args: process.argv.slice(2),
     options: {
-      "upstream-repository": {
-        type: "string",
-        default:
-          process.env.UPSTREAM_REPOSITORY ?? "huamurui/zhihu-minus-minus",
-      },
-      "app-id": { type: "string", default: "zhihu-minus-minus" },
+      trackers: { type: "string", default: "data/upstreams.json" },
       "output-dir": { type: "string", default: ".release-sync" },
+      "manifest-output": {
+        type: "string",
+        default: ".release-sync/manifest.json",
+      },
       "github-output": { type: "string" },
     },
   });
 
   return {
-    upstreamRepository: values["upstream-repository"],
-    appId: values["app-id"],
+    trackersPath: values.trackers,
     outputDir: values["output-dir"],
+    manifestOutput: values["manifest-output"],
     githubOutput: values["github-output"],
   };
 }
@@ -210,48 +245,57 @@ export async function downloadReleaseAsset(
   return hash.digest("hex");
 }
 
-async function writeGitHubOutput(
-  path: string | undefined,
-  result: SyncResult,
+async function writeOutputs(
+  options: CliOptions,
+  manifest: SyncManifest,
 ): Promise<void> {
-  if (!path) {
+  await mkdir(dirname(resolve(options.manifestOutput)), { recursive: true });
+  await writeFile(
+    resolve(options.manifestOutput),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    "utf8",
+  );
+
+  if (!options.githubOutput) {
     return;
   }
 
+  const versions = manifest.updates
+    .map((update) => update.version)
+    .filter((version, index, all) => all.indexOf(version) === index)
+    .join(",");
   const lines = [
-    `updated=${result.updated}`,
-    `version=${result.version}`,
-    `reason=${result.reason}`,
-    `file=${result.file ?? ""}`,
-    `key=${result.key ?? ""}`,
+    `updated=${manifest.updates.length > 0}`,
+    `manifest=${resolve(options.manifestOutput)}`,
+    `versions=${versions}`,
   ];
-  await appendFile(path, `${lines.join("\n")}\n`, "utf8");
+  await appendFile(options.githubOutput, `${lines.join("\n")}\n`, "utf8");
 }
 
-async function syncRelease(options: CliOptions): Promise<SyncResult> {
+async function syncRelease(
+  options: CliOptions,
+  metadata: AppsMetadata,
+  upstream: Upstream,
+): Promise<SyncUpdate | undefined> {
   const release = await fetchJson<GitHubRelease>(
-    `https://api.github.com/repos/${options.upstreamRepository}/releases/latest`,
+    `https://api.github.com/repos/${upstream.repository}/releases/latest`,
   );
   if (release.draft || release.prerelease) {
-    throw new Error("GitHub latest release unexpectedly returned a draft or prerelease");
+    throw new Error(
+      `${upstream.repository}: latest release is a draft or prerelease`,
+    );
   }
 
   const version = versionFromTag(release.tag_name);
   const asset = selectIpaAsset(release);
   if (!asset) {
-    throw new Error(`Release ${release.tag_name} does not contain an IPA asset`);
+    throw new Error(
+      `${upstream.repository}: release ${release.tag_name} does not contain an IPA asset`,
+    );
   }
 
-  const metadataPath = join(process.cwd(), "data", "apps.json");
-  const metadata = appsMetadataSchema.parse(
-    JSON.parse(await readFile(metadataPath, "utf8")),
-  );
-  const app = metadata.apps.find((candidate) => candidate.id === options.appId);
-  if (!app) {
-    throw new Error(`App '${options.appId}' does not exist in data/apps.json`);
-  }
-
-  const existingVersion = app.versions.find(
+  const app = metadata.apps.find((candidate) => candidate.id === upstream.appId);
+  const existingVersion = app?.versions.find(
     (candidate) => candidate.version === version,
   );
   const remoteDigest = sha256FromDigest(asset.digest);
@@ -260,29 +304,28 @@ async function syncRelease(options: CliOptions): Promise<SyncResult> {
     existingVersion.file.size === asset.size &&
     (!remoteDigest || existingVersion.file.sha256 === remoteDigest)
   ) {
-    return {
-      updated: false,
-      version,
-      reason: `version ${version} is already up to date`,
-    };
+    console.log(
+      `${upstream.repository}: version ${version} is already up to date`,
+    );
+    return undefined;
   }
 
   const fileName = safeFileName(asset.name);
-  const key = `apps/${app.id}/${version}/${fileName}`;
+  const key = `apps/${upstream.appId}/${version}/${fileName}`;
   const outputDir = resolve(options.outputDir);
   await mkdir(outputDir, { recursive: true });
-  const outputPath = join(outputDir, basename(fileName));
+  const outputPath = join(outputDir, `${upstream.appId}-${basename(fileName)}`);
   const sha256 = await downloadReleaseAsset(asset, outputPath);
   const downloadedSize = (await stat(outputPath)).size;
 
   if (downloadedSize !== asset.size) {
     throw new Error(
-      `Downloaded IPA size mismatch: expected ${asset.size}, got ${downloadedSize}`,
+      `${upstream.repository}: downloaded IPA size mismatch, expected ${asset.size}, got ${downloadedSize}`,
     );
   }
   if (remoteDigest && remoteDigest !== sha256) {
     throw new Error(
-      `Downloaded IPA digest mismatch: GitHub says ${remoteDigest}, downloaded ${sha256}`,
+      `${upstream.repository}: downloaded IPA digest mismatch, GitHub says ${remoteDigest}, downloaded ${sha256}`,
     );
   }
 
@@ -296,17 +339,29 @@ async function syncRelease(options: CliOptions): Promise<SyncResult> {
       sha256,
     },
   });
-  const nextMetadata = upsertAppVersion(metadata, options.appId, versionEntry);
-  await writeFile(
-    metadataPath,
-    `${JSON.stringify(nextMetadata, null, 2)}\n`,
-    "utf8",
+  const existingApp = metadata.apps.some(
+    (candidate) => candidate.id === upstream.appId,
   );
+  const nextMetadata = upsertTrackedVersion(
+    metadata,
+    upstream,
+    versionEntry,
+  );
+  metadata.apps.splice(0, metadata.apps.length, ...nextMetadata.apps);
 
+  const reason = !existingApp
+    ? "new app"
+    : existingVersion
+      ? "release asset changed"
+      : "new release";
+  console.log(
+    `${upstream.repository}: prepared ${version}, ${sha256}, R2 key ${key}`,
+  );
   return {
-    updated: true,
+    repository: upstream.repository,
+    appId: upstream.appId,
     version,
-    reason: existingVersion ? "release asset changed" : "new release",
+    reason,
     file: outputPath,
     key,
   };
@@ -314,15 +369,42 @@ async function syncRelease(options: CliOptions): Promise<SyncResult> {
 
 async function main(): Promise<void> {
   const options = parseCli();
-  const result = await syncRelease(options);
-  await writeGitHubOutput(options.githubOutput, result);
+  const metadataPath = join(process.cwd(), "data", "apps.json");
+  const metadata = appsMetadataSchema.parse(
+    JSON.parse(await readFile(metadataPath, "utf8")),
+  );
+  const trackers = upstreamsMetadataSchema.parse(
+    JSON.parse(await readFile(resolve(options.trackersPath), "utf8")),
+  );
 
-  if (result.updated) {
-    console.log(
-      `Release ${result.version} prepared at ${result.file} for R2 key ${result.key}`,
+  const updates: SyncUpdate[] = [];
+  for (const upstream of trackers.upstreams) {
+    const update = await syncRelease(options, metadata, upstream);
+    if (update) {
+      updates.push(update);
+    }
+  }
+
+  if (updates.length > 0) {
+    await writeFile(
+      metadataPath,
+      `${JSON.stringify(metadata, null, 2)}\n`,
+      "utf8",
     );
+  }
+
+  const manifest: SyncManifest = {
+    checkedAt: new Date().toISOString(),
+    updates,
+  };
+  await writeOutputs(options, manifest);
+
+  if (updates.length === 0) {
+    console.log("No upstream updates found.");
   } else {
-    console.log(`No update: ${result.reason}`);
+    console.log(
+      `Prepared ${updates.length} update(s): ${updates.map((update) => `${update.appId}@${update.version}`).join(", ")}`,
+    );
   }
 }
 

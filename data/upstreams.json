@@ -1,0 +1,19 @@
+{
+  "upstreams": [
+    {
+      "repository": "huamurui/zhihu-minus-minus",
+      "appId": "zhihu-minus-minus"
+    },
+    {
+      "repository": "jiangtian616/JHenTai",
+      "appId": "jhentai",
+      "createApp": {
+        "name": "JHenTai",
+        "bundleIdentifier": "top.jtmonster.jhentai",
+        "icon": "icons/jhentai.png",
+        "type": 1,
+        "tintColor": "E6E623"
+      }
+    }
+  ]
+}

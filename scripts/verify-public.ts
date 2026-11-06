@@ -151,15 +151,20 @@ async function main(): Promise<void> {
     try {
       const source = await verifySource(options.sourceUrl);
 
-      if (
-        options.expectedVersion &&
-        !source.apps.some((app) => app.version === options.expectedVersion)
-      ) {
+      const expectedVersions =
+        options.expectedVersion
+          ?.split(",")
+          .map((version) => version.trim())
+          .filter(Boolean) ?? [];
+      const missingVersions = expectedVersions.filter(
+        (version) => !source.apps.some((app) => app.version === version),
+      );
+      if (missingVersions.length > 0) {
         const versions = [...new Set(source.apps.map((app) => app.version))].join(
           ", ",
         );
         throw new Error(
-          `Published source does not contain expected version ${options.expectedVersion}. Available versions: ${versions}`,
+          `Published source is missing expected version(s) ${missingVersions.join(", ")}. Available versions: ${versions}`,
         );
       }
 
@@ -172,7 +177,7 @@ async function main(): Promise<void> {
       }
 
       console.log(
-        `Public source verified: ${source.apps.length} app version(s) at ${source.sourceURL}${options.expectedVersion ? `; expected version ${options.expectedVersion} is present` : ""}`,
+        `Public source verified: ${source.apps.length} app version(s) at ${source.sourceURL}${expectedVersions.length > 0 ? `; expected version(s) ${expectedVersions.join(", ")} are present` : ""}`,
       );
       return;
     } catch (error) {
