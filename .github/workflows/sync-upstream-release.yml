@@ -1,6 +1,12 @@
 name: Sync upstream release
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - data/upstreams.json
+      - .github/workflows/sync-upstream-release.yml
   schedule:
     # UTC 01:17 = Asia/Shanghai 09:17
     - cron: "17 1 * * *"

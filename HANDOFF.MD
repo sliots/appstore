@@ -13,6 +13,7 @@
 - Pages 项目 Git Provider 已为 `Yes`，最新 `main` 提交构建成功并成为 Production。
 - 本机 `.env` 已配置真实公开地址，文件被 Git 忽略。
 - 已实现 `.github/workflows/sync-upstream-release.yml`，每天约 09:17（Asia/Shanghai）检查 `data/upstreams.json` 中所有仓库的最新正式 Release。
+- 修改 `data/upstreams.json` 或同步工作流本身会立即触发一次同步；Actions 只修改 `data/apps.json`，因此不会循环触发。
 - 自动同步会下载未签名 IPA、核对 GitHub digest、上传 R2、更新版本历史、提交并等待 Pages 发布新版本。
 - 已加入 `jiangtian616/JHenTai` 跟踪配置与图标，但按用户要求没有本地上传其 IPA；首次 Actions 运行时会创建 app 并上传 `JHenTai_8.0.18+344.ipa`。
 
