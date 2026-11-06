@@ -19,6 +19,26 @@
           }
         }
       ]
+    },
+    {
+      "id": "jhentai",
+      "name": "JHenTai",
+      "bundleIdentifier": "top.jtmonster.jhentai",
+      "icon": "icons/jhentai.png",
+      "type": 1,
+      "tintColor": "E6E623",
+      "versions": [
+        {
+          "version": "8.0.18",
+          "versionDate": "2026-10-23T15:40:51Z",
+          "versionDescription": "- 修复解锁归档时出现卡解析Ⅰ的异常问题\n\n--------------------\n\n- Fix the bug that caused a parsing error I when unlocking archives.",
+          "file": {
+            "key": "apps/jhentai/8.0.18/JHenTai_8.0.18+344.ipa",
+            "size": 13027008,
+            "sha256": "9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181"
+          }
+        }
+      ]
     }
   ]
 }
