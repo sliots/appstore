@@ -25,6 +25,17 @@
         "type": 2,
         "tintColor": "2D4553"
       }
+    },
+    {
+      "repository": "MinusJoe/GateNest",
+      "appId": "gatenest",
+      "createApp": {
+        "name": "GateNest",
+        "bundleIdentifier": "com.ppx.sub2apimate",
+        "icon": "icons/gatenest.png",
+        "type": 4,
+        "tintColor": "1F6058"
+      }
     }
   ]
 }

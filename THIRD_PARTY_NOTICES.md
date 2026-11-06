@@ -26,3 +26,10 @@ All uploaded IPAs must be legally redistributable by the operator. Signing an IP
 - License: GNU General Public License, version 2 or later
 
 `public/icons/ppsspp.png` is sourced from the PPSSPP iOS AppIcon asset. The IPA itself is not committed to this repository.
+
+## GateNest
+
+- Project: https://github.com/MinusJoe/GateNest
+- License: Apache License 2.0
+
+`public/icons/gatenest.png` is sourced from the GateNest iOS AppIcon asset. The IPA itself is not committed to this repository.
