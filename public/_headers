@@ -1,0 +1,9 @@
+/icons/*
+  Cache-Control: public, max-age=86400
+  X-Content-Type-Options: nosniff
+
+/appstore
+  Cache-Control: no-store
+
+/appstore.json
+  Cache-Control: no-store

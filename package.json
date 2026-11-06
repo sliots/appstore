@@ -1,0 +1,31 @@
+{
+  "name": "signall-app-source",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A lightweight self-hosted SignAll app source backed by Cloudflare.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "validate": "tsx src/validate.ts",
+    "build": "tsx src/build.ts",
+    "dev": "npm run build && wrangler pages dev dist --port 8788",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:pages": "tsx scripts/smoke-pages.ts",
+    "verify:public": "tsx scripts/verify-public.ts",
+    "ipa:upload": "tsx scripts/upload-ipa.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0",
+    "wrangler": "^4.158.0"
+  }
+}

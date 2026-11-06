@@ -1,0 +1,24 @@
+{
+  "apps": [
+    {
+      "id": "zhihu-minus-minus",
+      "name": "知乎--",
+      "bundleIdentifier": "com.huamu013.ZhihuMinusMinus",
+      "icon": "icons/zhihu-minus-minus.png",
+      "type": 1,
+      "tintColor": "1D9BF0",
+      "versions": [
+        {
+          "version": "0.9.9",
+          "versionDate": "2026-11-05T20:55:17+08:00",
+          "versionDescription": "修复 iOS 分享与大图导出问题，优化回答操作栏和液态玻璃控件。",
+          "file": {
+            "key": "apps/zhihu-minus-minus/0.9.9/zhihu-minus-minus-v0.9.9-unsigned.ipa",
+            "size": 14830602,
+            "sha256": "adc704a5dbe41e80c3a11946d79cef9c16a9bfaee01834beeebe21a1672b32ae"
+          }
+        }
+      ]
+    }
+  ]
+}

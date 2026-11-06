@@ -1,0 +1,9 @@
+{
+  "name": "SignAll App Source",
+  "identifier": "io.github.sliots.appstore.source",
+  "message": "欢迎使用 SignAll App Source。\r\n所有 IPA 请仅用于合法授权的测试与分发。",
+  "sourceURL": "${PUBLIC_BASE_URL}/appstore",
+  "sourceicon": "icons/source.png",
+  "payURL": "",
+  "unlockURL": "${PUBLIC_BASE_URL}/appstore"
+}
