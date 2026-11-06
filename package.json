@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "test:pages": "tsx scripts/smoke-pages.ts",
     "verify:public": "tsx scripts/verify-public.ts",
-    "ipa:upload": "tsx scripts/upload-ipa.ts"
+    "ipa:upload": "tsx scripts/upload-ipa.ts",
+    "release:sync": "tsx scripts/sync-upstream-release.ts"
   },
   "dependencies": {
     "zod": "^4.6.7"

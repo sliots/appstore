@@ -9,8 +9,11 @@
 - Pages 项目：`signall-app-source`；线上源：`https://signall-app-source.pages.dev/appstore`。
 - 示例 IPA 已上传，生产 GET/POST/HEAD、图标和 IPA 直链验证通过。
 - 已在 iOS 全能签中验证订阅、刷新、应用显示和进入签名流程。
-- GitHub 远端当前仍无提交，Pages 项目尚未连接 Git provider。
+- GitHub `main` 已建立并推送，自动同步功能随最新提交发布。
+- Pages 项目当前 Git Provider 仍为 `No`，需要完成 `Connect to Git`。
 - 本机 `.env` 已配置真实公开地址，文件被 Git 忽略。
+- 已实现 `.github/workflows/sync-upstream-release.yml`，每 6 小时检查 `huamurui/zhihu-minus-minus` 最新正式 Release。
+- 自动同步会下载未签名 IPA、核对 GitHub digest、上传 R2、更新版本历史、提交并等待 Pages 发布新版本。
 
 ## 已确认的协议事实
 
@@ -59,10 +62,13 @@
 - 首次部署前必须先上传示例 IPA，否则部署后的资源验证会失败。
 - Wrangler 4.158 的 `pages project create` 会默认委派到新版 Workers 流程，并对无 `main`/`assets` 的配置报错。创建传统 Pages 项目时必须使用 `--force`；项目创建后不要再给后续 `pages deploy` 加 `--force`。
 - 当前 Pages 项目最初由直接上传创建，Git Provider 为 `No`，需要在 Dashboard 中执行 `Connect to Git`。
+- GitHub 自动同步上传 R2 需要 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID` Secrets；若缺少，新版本任务会在上传阶段失败且不会提交元数据。
+- 自动同步只更新版本、更新说明、日期、大小、SHA-256 和 R2 键。上游如果修改 bundle identifier 或图标，仍需人工更新配置。
 
 ## 下一步
 
-- 提交并推送仓库到 `https://github.com/sliots/appstore.git`。
 - 在 Cloudflare Pages 项目设置中连接 GitHub、`main` 分支与 `dist` 输出目录。
 - 为 Production 和 Preview 配置 `NODE_VERSION`、`PUBLIC_BASE_URL`、`R2_PUBLIC_BASE_URL`。
 - 触发首次 Git 构建并重新执行生产验证。
+- 创建仅含 R2 写权限的 Cloudflare API Token，并写入 GitHub Secrets。
+- 手动运行 `Sync upstream release`，确认当前 `v0.9.9` 返回无更新。

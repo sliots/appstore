@@ -4,6 +4,7 @@ dist/
 .env.*
 !.env.example
 .wrangler/
+.release-sync/
 coverage/
 *.ipa
 *.log

@@ -124,6 +124,39 @@ npm run ipa:upload -- --file $ipa --key $key --bucket signall-ipa
 
 当前示例 IPA 是未签名包，需要导入全能签后由用户自己的证书签名。示例图标和描述来自上述上游项目，许可信息见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
+## 自动跟踪上游 Release
+
+[sync-upstream-release.yml](.github/workflows/sync-upstream-release.yml) 每 6 小时检查一次 `huamurui/zhihu-minus-minus` 的最新正式 Release，也可以从 GitHub Actions 页面手动运行。
+
+处理流程：
+
+1. 调用 GitHub Releases API 获取最新正式版，不接受 draft 或 prerelease。
+2. 优先选择文件名包含 `unsigned` 的 `.ipa`，否则使用第一个 `.ipa`。
+3. 根据 tag 生成版本号，例如 `v0.9.10` 转为 `0.9.10`。
+4. 下载 IPA，并与 GitHub 提供的 SHA-256 digest 和文件大小交叉校验。
+5. 上传到 R2 的 `apps/zhihu-minus-minus/<version>/<file>.ipa`。
+6. 更新 `data/apps.json`，新版本放在历史版本前面。
+7. 提交并推送到 `main`，由 Cloudflare Pages Git 集成自动发布。
+8. 等待并验证线上源确实包含新版本。
+
+版本已经存在且文件大小、SHA-256 均一致时，工作流不会下载 IPA，也不会产生提交。
+
+### GitHub 配置
+
+在 GitHub 仓库添加 Secrets：
+
+- `CLOUDFLARE_API_TOKEN`：Cloudflare API Token，至少包含目标账号的 `Workers R2 Storage: Edit` 权限。
+- `CLOUDFLARE_ACCOUNT_ID`：Cloudflare Account ID。
+
+可选的 Repository Variables：
+
+- `R2_BUCKET`：R2 bucket 名称，未设置时默认 `signall-ipa`。
+- `PUBLIC_BASE_URL`：线上源 origin，例如 `https://signall-app-source.pages.dev`。设置后，自动化会在发布后验证新版本是否已经出现在公开源。
+
+Cloudflare Token 只保存在 GitHub Secrets，不写入仓库、构建产物或日志。若仓库或组织限制了 `GITHUB_TOKEN` 的写权限，需要在 `Settings` → `Actions` → `General` 中允许工作流写入仓库内容。
+
+首次启用前必须完成 Cloudflare Pages Git 连接。上传 IPA 失败时，工作流会在提交元数据之前停止，不会发布指向不存在文件的版本。
+
 ## 部署到 Cloudflare Pages
 
 推荐将现有 Pages 项目连接到 GitHub 仓库，由 Cloudflare 在 `main` 更新后自动构建。这样不需要把 Cloudflare API Token 放进 GitHub。
@@ -173,6 +206,12 @@ npx wrangler pages deploy dist --project-name signall-app-source --branch main
 npm run verify:public -- "https://signall-app-source.pages.dev/appstore"
 ```
 
+指定预期版本验证：
+
+```powershell
+npm run verify:public -- "https://signall-app-source.pages.dev/appstore" --expected-version 0.9.9
+```
+
 ## 客户端订阅
 
 部署并验证完成后，在全能签中加入：
@@ -214,6 +253,7 @@ https://signall-app-source.pages.dev/appstore
 │   └── icons/
 ├── scripts/
 │   ├── smoke-pages.ts
+│   ├── sync-upstream-release.ts
 │   ├── upload-ipa.ts
 │   └── verify-public.ts
 ├── src/

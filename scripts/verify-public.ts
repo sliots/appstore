@@ -7,6 +7,7 @@ interface VerifyOptions {
   delayMs: number;
   skipAssets: boolean;
   sourceUrl: string;
+  expectedVersion?: string | undefined;
 }
 
 function parseCli(): VerifyOptions {
@@ -17,6 +18,7 @@ function parseCli(): VerifyOptions {
       attempts: { type: "string", default: "6" },
       delay: { type: "string", default: "5000" },
       "skip-assets": { type: "boolean", default: false },
+      "expected-version": { type: "string" },
     },
   });
 
@@ -54,6 +56,7 @@ function parseCli(): VerifyOptions {
     delayMs,
     skipAssets: values["skip-assets"],
     sourceUrl: parsedSourceUrl.toString(),
+    expectedVersion: values["expected-version"],
   };
 }
 
@@ -148,6 +151,18 @@ async function main(): Promise<void> {
     try {
       const source = await verifySource(options.sourceUrl);
 
+      if (
+        options.expectedVersion &&
+        !source.apps.some((app) => app.version === options.expectedVersion)
+      ) {
+        const versions = [...new Set(source.apps.map((app) => app.version))].join(
+          ", ",
+        );
+        throw new Error(
+          `Published source does not contain expected version ${options.expectedVersion}. Available versions: ${versions}`,
+        );
+      }
+
       if (!options.skipAssets) {
         const assetUrls = new Set<string>([
           source.sourceicon,
@@ -157,7 +172,7 @@ async function main(): Promise<void> {
       }
 
       console.log(
-        `Public source verified: ${source.apps.length} app version(s) at ${source.sourceURL}`,
+        `Public source verified: ${source.apps.length} app version(s) at ${source.sourceURL}${options.expectedVersion ? `; expected version ${options.expectedVersion} is present` : ""}`,
       );
       return;
     } catch (error) {
