@@ -80,6 +80,9 @@
 - GateNest 最新 IPA 为 `gatenest-v1.9.0-unsigned.ipa`，`18785383` 字节，SHA-256 `8c13588c24194fbcee2b021c18937e9d88c6a04cfb5234c0a4ea32bdc8d3ac8f`，许可证 Apache-2.0。
 - GateNest 上游中文 README 声明当前维护仓库为 `trilogys/GateNest`；本项目仍按用户指定的 `MinusJoe/GateNest` 跟踪，若该镜像停止发布需要人工切换。
 - GateNest 同步提交为 `546d14c`，线上源已验证包含 0.9.9、8.0.18、1.20.4、1.9.0 四个版本，GateNest R2 直链返回 200。
+- 已加入 `ComicSparks/jasmine` 跟踪配置与官方 iOS 图标，由配置变更自动触发 Actions。
+- Jasmine bundle identifier 来自 `ios/Runner.xcodeproj/project.pbxproj`：`opensource.jasmine`。
+- Jasmine 最新 IPA 为 `jasmine-v1.7.22-nosign.ipa`，`16242547` 字节，SHA-256 `55e619619a12c4e8c9d6769534575fec1636af7c5b5fd7e0260249155124debb`，许可证 MIT。
 - 首次 JHenTai 同步时，Cloudflare 构建和静态资源上传成功，但 Function 发布返回 `Unknown internal error occurred`；通过 Pages API 重试同一提交后成功。
 - GitHub Actions 的“部署后验证”曾因未配置 `PUBLIC_BASE_URL` Variable 而被跳过，掩盖了 Pages 构建失败；现在 workflow 默认回退到 `https://signall-app-source.pages.dev` 并始终执行版本验证。
 - `/appstore` 响应已改为 `Cache-Control: no-store`，避免更新后手机端继续缓存旧 JSON。若客户端自身仍缓存，手动下拉刷新或重启客户端即可。

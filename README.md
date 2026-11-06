@@ -135,6 +135,7 @@ npm run ipa:upload -- --file $ipa --key $key --bucket signall-ipa
 - `jiangtian616/JHenTai` → app id `jhentai`
 - `hrydgard/ppsspp` → app id `ppsspp`
 - `MinusJoe/GateNest` → app id `gatenest`
+- `ComicSparks/jasmine` → app id `jasmine`
 
 处理流程：
 

@@ -36,6 +36,17 @@
         "type": 4,
         "tintColor": "1F6058"
       }
+    },
+    {
+      "repository": "ComicSparks/jasmine",
+      "appId": "jasmine",
+      "createApp": {
+        "name": "Jasmine",
+        "bundleIdentifier": "opensource.jasmine",
+        "icon": "icons/jasmine.png",
+        "type": 1,
+        "tintColor": "2C2C2C"
+      }
     }
   ]
 }
