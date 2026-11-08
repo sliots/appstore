@@ -68,6 +68,7 @@
 - 自动同步只更新版本、更新说明、日期、大小、SHA-256 和 R2 键。上游如果修改 bundle identifier 或图标，仍需人工更新配置。
 - 多仓库同步先下载所有变更并更新内存中的 metadata，全部成功后才写 `data/apps.json`；任何一个下载校验失败都不会产生 R2 之后的元数据提交。
 - Actions 的校验步骤运行在同步器已修改 `data/apps.json` 的工作区上；测试必须按应用 ID/名称定位记录，不能假设应用总数固定为 1，也不能依赖数组首位永远是知乎。
+- 测试也不能把当前版本号或 R2 路径写死。知乎从 0.9.9 更新到 0.9.10 时，旧断言导致同步在 R2 上传前失败。
 - GitHub Actions 的 cron 使用 UTC；当前 `17 1 * * *` 对应北京时间约 09:17，平台负载可能造成延迟。
 - JHenTai 的 iOS bundle identifier 来自 `ios/Runner.xcodeproj/project.pbxproj`：`top.jtmonster.jhentai`。
 - JHenTai 最新 IPA 为 `JHenTai_8.0.18+344.ipa`，`13027008` 字节，SHA-256 `9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181`。

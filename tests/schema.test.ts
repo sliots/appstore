@@ -11,11 +11,12 @@ describe("metadata schema", () => {
     const zhihu = raw.apps.find(
       (app: { id: string }) => app.id === "zhihu-minus-minus",
     );
+    const version = zhihu.versions[0].version;
     zhihu.versions[0].file.key =
       "apps/other-app/0.9.9/zhihu-minus-minus.ipa";
 
     expect(() => appsMetadataSchema.parse(raw)).toThrow(
-      "must start with apps/zhihu-minus-minus/0.9.9/",
+      `must start with apps/zhihu-minus-minus/${version}/`,
     );
   });
 
