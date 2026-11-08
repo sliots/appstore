@@ -9,6 +9,16 @@
       "tintColor": "1D9BF0",
       "versions": [
         {
+          "version": "0.9.10",
+          "versionDate": "2026-11-06T14:01:41Z",
+          "versionDescription": "### What's Changed\n* 统一首页导航与内容操作栏外观 by @huamurui in https://github.com/huamurui/zhihu-minus-minus/pull/187\n* 调整 Android 页面进入和返回转场 by @huamurui in https://github.com/huamurui/zhihu-minus-minus/pull/186\n* 优化文章与想法详情首屏和操作栏 by @huamurui in https://github.com/huamurui/zhihu-minus-minus/pull/188\n\n<img height=\"500\" alt=\"telegram-cloud-photo-size-5-6296309837490493137-w\" src=\"https://github.com/user-attachments/assets/bbed6e50-bf62-4205-a4ef-65cc71fd9174\" />\n\n<img height=\"500\" alt=\"telegram-cloud-photo-size-5-6298716015608665964-w\" src=\"https://github.com/user-attachments/assets/99226fd4-0af5-47a7-b3aa-5aae9ac0b929\" />\n\n**Full Changelog**: https://github.com/huamurui/zhihu-minus-minus/compare/v0.9.9...v0.9.10",
+          "file": {
+            "key": "apps/zhihu-minus-minus/0.9.10/zhihu-minus-minus-v0.9.10-unsigned.ipa",
+            "size": 14833319,
+            "sha256": "8884c6f5913715d16b240241fb3ef33ad5d9b51cefaed689a755f332b43910c8"
+          }
+        },
+        {
           "version": "0.9.9",
           "versionDate": "2026-11-05T20:55:17+08:00",
           "versionDescription": "修复 iOS 分享与大图导出问题，优化回答操作栏和液态玻璃控件。",
