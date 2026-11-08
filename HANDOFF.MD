@@ -70,6 +70,7 @@
 - 多仓库同步先下载所有变更并更新内存中的 metadata，全部成功后才写 `data/apps.json`；任何一个下载校验失败都不会产生 R2 之后的元数据提交。
 - Actions 的校验步骤运行在同步器已修改 `data/apps.json` 的工作区上；测试必须按应用 ID/名称定位记录，不能假设应用总数固定为 1，也不能依赖数组首位永远是知乎。
 - 测试也不能把当前版本号或 R2 路径写死。知乎从 0.9.9 更新到 0.9.10 时，旧断言导致同步在 R2 上传前失败。
+- 运行 `42458761774` 的失败已修复；知乎 0.9.10 随后通过 Actions 自动上传并同步，提交为 `7f82184`。
 - GitHub Actions 的 cron 使用 UTC；当前 `17 1 * * *` 对应北京时间约 09:17，平台负载可能造成延迟。
 - JHenTai 的 iOS bundle identifier 来自 `ios/Runner.xcodeproj/project.pbxproj`：`top.jtmonster.jhentai`。
 - JHenTai 最新 IPA 为 `JHenTai_8.0.18+344.ipa`，`13027008` 字节，SHA-256 `9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181`。
@@ -89,6 +90,7 @@
 - 首次 JHenTai 同步时，Cloudflare 构建和静态资源上传成功，但 Function 发布返回 `Unknown internal error occurred`；通过 Pages API 重试同一提交后成功。
 - GitHub Actions 的“部署后验证”曾因未配置 `PUBLIC_BASE_URL` Variable 而被跳过，掩盖了 Pages 构建失败；现在 workflow 默认回退到 `https://signall-app-source.pages.dev` 并始终执行版本验证。
 - `/appstore` 响应已改为 `Cache-Control: no-store`，避免更新后手机端继续缓存旧 JSON。若客户端自身仍缓存，手动下拉刷新或重启客户端即可。
+- 线上源当前验证包含知乎 0.9.10、JHenTai 8.0.18、PPSSPP 1.20.4、GateNest 1.9.0、Jasmine 1.7.22，共 6 条版本记录。
 
 ## 下一步
 
