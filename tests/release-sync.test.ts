@@ -16,11 +16,21 @@ import {
 } from "../scripts/sync-upstream-release.js";
 import {
   appsMetadataSchema,
-  upstreamsMetadataSchema,
+  type UpstreamsMetadata,
 } from "../src/schema.js";
 
 const digest =
   "adc704a5dbe41e80c3a11946d79cef9c16a9bfaee01834beeebe21a1672b32ae";
+const previousEntry = {
+  version: "0.9.9",
+  versionDate: "2026-11-05T12:00:00Z",
+  versionDescription: "历史版本",
+  file: {
+    key: "apps/zhihu-minus-minus/0.9.9/zhihu-minus-minus-v0.9.9-unsigned.ipa",
+    size: 100,
+    sha256: digest,
+  },
+};
 const tempDirectories: string[] = [];
 
 afterEach(async () => {
@@ -30,6 +40,22 @@ afterEach(async () => {
     ),
   );
 });
+
+function appsFixture() {
+  return appsMetadataSchema.parse({
+    apps: [
+      {
+        id: "zhihu-minus-minus",
+        name: "知乎--",
+        bundleIdentifier: "com.huamu013.ZhihuMinusMinus",
+        icon: "icons/zhihu-minus-minus.png",
+        type: 1,
+        tintColor: "1D9BF0",
+        versions: [previousEntry],
+      },
+    ],
+  });
+}
 
 function releaseFixture(): GitHubRelease {
   return {
@@ -73,12 +99,8 @@ describe("upstream release parsing", () => {
     );
   });
 
-  it("prepends and replaces version metadata", async () => {
-    const metadata = appsMetadataSchema.parse(
-      JSON.parse(
-        await readFile(join(process.cwd(), "data", "apps.json"), "utf8"),
-      ),
-    );
+  it("prepends and replaces version metadata", () => {
+    const metadata = appsFixture();
     const nextEntry = {
       version: "0.9.10",
       versionDate: "2026-11-07T12:00:00Z",
@@ -91,40 +113,30 @@ describe("upstream release parsing", () => {
     };
 
     const added = upsertAppVersion(metadata, "zhihu-minus-minus", nextEntry);
-    expect(
-      added.apps
-        .find((app) => app.id === "zhihu-minus-minus")
-        ?.versions.map((entry) => entry.version),
-    ).toEqual(["0.9.10", "0.9.9"]);
+    expect(added.apps[0]?.versions).toEqual([nextEntry, previousEntry]);
 
-    const replaced = upsertAppVersion(added, "zhihu-minus-minus", {
+    const revisedEntry = {
       ...nextEntry,
       versionDescription: "修订说明",
-    });
-    const replacedZhihu = replaced.apps.find(
-      (app) => app.id === "zhihu-minus-minus",
-    );
-    expect(replacedZhihu?.versions).toHaveLength(2);
-    expect(replacedZhihu?.versions[0]?.versionDescription).toBe("修订说明");
+    };
+    const replaced = upsertAppVersion(added, "zhihu-minus-minus", revisedEntry);
+    expect(replaced.apps[0]?.versions).toEqual([revisedEntry, previousEntry]);
   });
 
-  it("creates a missing app from upstream defaults", async () => {
-    const metadata = appsMetadataSchema.parse(
-      JSON.parse(
-        await readFile(join(process.cwd(), "data", "apps.json"), "utf8"),
-      ),
-    );
-    const upstreams = upstreamsMetadataSchema.parse(
-      JSON.parse(
-        await readFile(join(process.cwd(), "data", "upstreams.json"), "utf8"),
-      ),
-    ).upstreams;
-    const jhentai = upstreams.find((upstream) => upstream.appId === "jhentai");
-    if (!jhentai) {
-      throw new Error("JHenTai upstream fixture is missing");
-    }
-
-    const updated = upsertTrackedVersion(metadata, jhentai, {
+  it("creates a missing app from upstream defaults", () => {
+    const metadata = appsFixture();
+    const upstream = {
+      repository: "jiangtian616/JHenTai",
+      appId: "jhentai",
+      createApp: {
+        name: "JHenTai",
+        bundleIdentifier: "top.jtmonster.jhentai",
+        icon: "icons/jhentai.png",
+        type: 1,
+        tintColor: "E6E623",
+      },
+    } satisfies UpstreamsMetadata["upstreams"][number];
+    const firstEntry = {
       version: "8.0.18",
       versionDate: "2026-10-23T15:40:51Z",
       versionDescription: "修复归档解锁解析异常。",
@@ -134,18 +146,13 @@ describe("upstream release parsing", () => {
         sha256:
           "9da792f811e7a201adc96d281b5610915c1c9e28adc47d13a9bfef46cc4cc181",
       },
-    });
+    };
 
-    expect(updated.apps.find((app) => app.id === "jhentai")).toMatchObject({
-      name: "JHenTai",
-      bundleIdentifier: "top.jtmonster.jhentai",
-      icon: "icons/jhentai.png",
-      type: 1,
-      tintColor: "E6E623",
-    });
-    expect(
-      updated.apps.find((app) => app.id === "jhentai")?.versions[0]?.version,
-    ).toBe("8.0.18");
+    const updated = upsertTrackedVersion(metadata, upstream, firstEntry);
+    expect(updated.apps).toEqual([
+      ...metadata.apps,
+      { id: "jhentai", ...upstream.createApp, versions: [firstEntry] },
+    ]);
   });
 });
 
