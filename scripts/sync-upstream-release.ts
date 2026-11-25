@@ -289,9 +289,10 @@ async function syncRelease(
   const version = versionFromTag(release.tag_name);
   const asset = selectIpaAsset(release);
   if (!asset) {
-    throw new Error(
-      `${upstream.repository}: release ${release.tag_name} does not contain an IPA asset`,
+    console.warn(
+      `${upstream.repository}: skipping release ${release.tag_name} because it has no IPA asset`,
     );
+    return undefined;
   }
 
   const app = metadata.apps.find((candidate) => candidate.id === upstream.appId);
